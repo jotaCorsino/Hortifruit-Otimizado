@@ -16,6 +16,34 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
+-- Table structure for table `controle_estoque`
+--
+
+DROP TABLE IF EXISTS `controle_estoque`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `controle_estoque` (
+  `id_produto` int NOT NULL AUTO_INCREMENT,
+  `nome_produto` varchar(100) NOT NULL,
+  `descricao` text,
+  `quantidade` int NOT NULL,
+  `preco` decimal(10,2) NOT NULL,
+  `data_ultima_atualizacao` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id_produto`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `controle_estoque`
+--
+
+LOCK TABLES `controle_estoque` WRITE;
+/*!40000 ALTER TABLE `controle_estoque` DISABLE KEYS */;
+INSERT INTO `controle_estoque` VALUES (1,'ype flores','detergente flore',20,3.00,'2024-09-11 17:50:26');
+/*!40000 ALTER TABLE `controle_estoque` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `usuarios`
 --
 
@@ -29,7 +57,7 @@ CREATE TABLE `usuarios` (
   `role` enum('usuario','admin') NOT NULL DEFAULT 'usuario',
   PRIMARY KEY (`id`),
   UNIQUE KEY `nome_usuario` (`nome_usuario`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -38,7 +66,7 @@ CREATE TABLE `usuarios` (
 
 LOCK TABLES `usuarios` WRITE;
 /*!40000 ALTER TABLE `usuarios` DISABLE KEYS */;
-INSERT INTO `usuarios` VALUES (1,'admin','senha123','admin'),(3,'lucas','admin123','admin');
+INSERT INTO `usuarios` VALUES (1,'admin','senha123','admin'),(3,'lucas','admin123','admin'),(4,'joao','senha123','admin');
 /*!40000 ALTER TABLE `usuarios` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -59,4 +87,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-09-06 16:50:16
+-- Dump completed on 2024-09-11 14:57:46

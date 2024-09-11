@@ -45,7 +45,7 @@ int verificar_usuario(MYSQL* conn, const char* nome_usuario, const char* senha) 
 
     // Associar parâmetros
     if (mysql_stmt_bind_param(stmt, bind) != 0) {//mysql_stmt_bind_param: Associa os parâmetros da consulta com os valores fornecidos (nome de usuário e senha).
-        fprintf(stderr, "Erro ao associar parâmetros: %s\n", mysql_stmt_error(stmt));
+        fprintf(stderr, "Erro ao associar parametros: %s\n", mysql_stmt_error(stmt));
         mysql_stmt_close(stmt);//Em caso de erro, imprime a mensagem e fecha o comando.
         return -1;
     }
@@ -80,7 +80,7 @@ int verificar_usuario(MYSQL* conn, const char* nome_usuario, const char* senha) 
 
     // Verificar se há linhas retornadas
     if (mysql_stmt_fetch(stmt) == MYSQL_NO_DATA) {
-        printf("Usuário ou senha incorretos.\n");
+        printf("Usuario ou senha incorretos.\n");
         mysql_stmt_close(stmt);
         return 0;
     }
@@ -90,11 +90,165 @@ int verificar_usuario(MYSQL* conn, const char* nome_usuario, const char* senha) 
         printf("Login bem-sucedido! Bem-vindo, Administrador.\n");
     }
     else {
-        printf("Login bem-sucedido! Bem-vindo, Usuário.\n");
+        printf("Login bem-sucedido! Bem-vindo, Usuario.\n");
     }
 
     mysql_stmt_close(stmt);
     return 1;
+}
+// Função para cadastrar produto
+void cadastrar_produto(MYSQL* conn) {
+    char nome[100] = "", descricao[255] = "";
+    int quantidade = 0;
+    double preco = 0.0;
+
+    printf("Digite o nome do produto: ");
+    if (scanf_s("%99s", nome, (unsigned)sizeof(nome)) != 1) {
+        printf("Erro ao ler o nome do produto.\n");
+        return;
+    }
+
+    printf("Digite a descricao do produto: ");
+    if (scanf_s(" %[^\n]s", descricao, (unsigned)sizeof(descricao)) != 1) {
+        printf("Erro ao ler a descricao do produto.\n");
+        return;
+    }
+
+    printf("Digite a quantidade: ");
+    if (scanf_s("%d", &quantidade) != 1) {
+        printf("Erro ao ler a quantidade.\n");
+        return;
+    }
+
+    printf("Digite o preco: ");
+    if (scanf_s("%lf", &preco) != 1) {
+        printf("Erro ao ler o preço.\n");
+        return;
+    }
+
+    char query[512];
+    if (sprintf_s(query, sizeof(query),
+        "INSERT INTO controle_estoque (nome_produto, descricao, quantidade, preco) VALUES ('%s', '%s', %d, %.2f)",
+        nome, descricao, quantidade, preco) < 0) {
+        fprintf(stderr, "Erro ao formatar a consulta SQL.\n");
+        return;
+    }
+
+    if (mysql_query(conn, query)) {
+        fprintf(stderr, "Erro ao cadastrar produto: %s\n", mysql_error(conn));
+    }
+    else {
+        printf("Produto cadastrado com sucesso!\n");
+    }
+}
+void editar_produto(MYSQL* conn) {
+    int id_produto;
+    char novo_nome[100] = "", nova_descricao[255] = "";
+    int nova_quantidade = 0;
+    double novo_preco = 0.0;
+
+    printf("Digite o ID do produto a ser editado: ");
+    if (scanf_s("%d", &id_produto) != 1) {
+        printf("Erro ao ler o ID do produto.\n");
+        return;
+    }
+
+    // Verifica se o produto existe
+    char verifica_query[100];
+    if (sprintf_s(verifica_query, sizeof(verifica_query), "SELECT COUNT(*) FROM controle_estoque WHERE id_produto = %d", id_produto) < 0) {
+        fprintf(stderr, "Erro ao formatar a consulta SQL.\n");
+        return;
+    }
+
+    if (mysql_query(conn, verifica_query)) {
+        fprintf(stderr, "Erro ao verificar o produto: %s\n", mysql_error(conn));
+        return;
+    }
+
+    MYSQL_RES* verifica_result = mysql_store_result(conn);
+    if (verifica_result == NULL) {
+        fprintf(stderr, "Erro ao armazenar resultado: %s\n", mysql_error(conn));
+        return;
+    }
+
+    MYSQL_ROW verifica_linha = mysql_fetch_row(verifica_result);
+    if (atoi(verifica_linha[0]) == 0) {
+        printf("Produto com ID %d nao encontrado.\n", id_produto);
+        mysql_free_result(verifica_result);
+        return;
+    }
+
+    mysql_free_result(verifica_result);
+
+    // Solicitar novos dados do produto
+    printf("Digite o novo nome do produto (deixe vazio para nao alterar): ");
+    scanf_s(" %[^\n]s", novo_nome, (unsigned)sizeof(novo_nome));//[^\n] é um conjunto de caracteres que diz "leia tudo que não é um \n". Isso permite a leitura de entradas que incluem espaços.
+    printf("Digite a nova descricao do produto (deixe vazio para nao alterar): ");
+    scanf_s(" %[^\n]s", nova_descricao, (unsigned)sizeof(nova_descricao));
+    printf("Digite a nova quantidade (ou 0 para não alterar): ");
+    if (scanf_s("%d", &nova_quantidade) != 1) {
+        printf("Erro ao ler a nova quantidade.\n");
+        return;
+    }
+
+    printf("Digite o novo preco (ou 0 para nao alterar): ");
+    if (scanf_s("%lf", &novo_preco) != 1) {
+        printf("Erro ao ler o novo preço.\n");
+        return;
+    }
+
+    // Formatar a query de atualização
+    char update_query[512];
+    sprintf_s(update_query, sizeof(update_query),
+        "UPDATE controle_estoque SET "
+        "nome_produto = IF('%s' != '', '%s', nome_produto), "
+        "descricao = IF('%s' != '', '%s', descricao), "
+        "quantidade = IF(%d != 0, %d, quantidade), "
+        "preco = IF(%.2f != 0, %.2f, preco) "
+        "WHERE id_produto = %d",
+        novo_nome, novo_nome, nova_descricao, nova_descricao, nova_quantidade, nova_quantidade, novo_preco, novo_preco, id_produto);
+
+    // Executar a query de atualização
+    if (mysql_query(conn, update_query)) {
+        fprintf(stderr, "Erro ao atualizar produto: %s\n", mysql_error(conn));
+    }
+    else {
+        printf("Produto atualizado com sucesso!\n");
+    }
+}
+
+// Função para mostrar o estoque
+void mostrar_estoque(MYSQL* conn) {
+    if (mysql_query(conn, "SELECT * FROM controle_estoque")) {
+        fprintf(stderr, "Erro ao buscar o estoque: %s\n", mysql_error(conn));
+        return;
+    }
+
+    MYSQL_RES* resultado = mysql_store_result(conn);
+    if (resultado == NULL) {
+        fprintf(stderr, "Erro ao armazenar resultado: %s\n", mysql_error(conn));
+        return;
+    }
+
+    MYSQL_ROW linha;
+    MYSQL_FIELD* campos = mysql_fetch_fields(resultado);
+    unsigned int num_campos = mysql_num_fields(resultado);
+
+    // Imprimir cabeçalho
+    for (unsigned int i = 0; i < num_campos; i++) {
+        printf("%-20s", campos[i].name);
+    }
+    printf("\n");
+
+    // Imprimir linhas do resultado
+    while ((linha = mysql_fetch_row(resultado))) {
+        for (unsigned int i = 0; i < num_campos; i++) {
+            printf("%-20s", linha[i] ? linha[i] : "NULL");
+        }
+        printf("\n");
+    }
+
+    mysql_free_result(resultado);
 }
 
 int main() {
@@ -109,7 +263,7 @@ int main() {
     char nome_usuario[50];
     char senha[50];
 
-    printf("Digite o nome de usuário: ");
+    printf("Digite o nome de usuario: ");
     if (scanf_s("%49s", nome_usuario, (unsigned)_countof(nome_usuario)) != 1) {  // scanf_s exige o tamanho do buffer
         fprintf(stderr, "Erro ao ler nome de usuário.\n");
         return 1;
@@ -121,10 +275,40 @@ int main() {
         return 1;
     }
 
+
     int resultado = verificar_usuario(conn, nome_usuario, senha);
     if (resultado == 1) {
         // Login bem-sucedido; continue para funcionalidades adicionais.
+        int opcao;
+        do {
+            printf("\n1. Cadastrar Produto\n");
+            printf("2. Mostrar Estoque\n");
+            printf("3. editar produto no estoque\n");
+            printf("4. Sair\n");
+            printf("Escolha uma opçao: ");
+            if (scanf_s("%d", &opcao) != 1) {
+                printf("Erro ao ler a opção.\n");
+                opcao = 3; // Sair em caso de erro de entrada
+            }
 
+            switch (opcao) {
+            case 1:
+                cadastrar_produto(conn);
+                break;
+            case 2:
+                mostrar_estoque(conn);
+                break;
+            case 3:
+                editar_produto(conn); 
+                break;
+            case 4:
+                printf("Saindo...\n");
+                break;
+            default:
+                printf("Opcao invalida!\n");
+                break;
+            }
+        } while (opcao != 4);
     }
 
     mysql_close(conn);

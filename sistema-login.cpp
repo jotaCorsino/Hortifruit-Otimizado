@@ -1,12 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string>
 #include <string.h>//usei para o comando strcmp e strlen
 #include <mysql.h>//precisa disso pra conectar com o banco de dados;
 #include <conio.h>
 //função para conectar ao banco de dados
 void conectar_ao_banco(MYSQL* conn) {//mysql* conn, o parametro con é usado para conectar com o banco de dados;
     // Conectar ao banco de dados;; local host== rodando na minha maquina;; lucas== meu nome de usario no banco;; password== é a senha para eu logar;; sistec== nome do banco de dados
-    if (mysql_real_connect(conn, "localhost", "lucas", "password", "sistec", 0, NULL, 0) == NULL) {//my sql_real_connect é a função que tenta se conectar ao banco usando os parametros
+    if (mysql_real_connect(conn, "localhost", "root", "jaque12", "sistec", 0, NULL, 0) == NULL) {//my sql_real_connect é a função que tenta se conectar ao banco usando os parametros
         fprintf(stderr, "Erro na conexão: %s\n", mysql_error(conn));//mysql error da imprime uma msg de erro pro usuario 
         mysql_close(conn);//e o mysql_close fecha a conexão
         exit(1);
@@ -250,7 +251,56 @@ void mostrar_estoque(MYSQL* conn) {
 
     mysql_free_result(resultado);
 }
+// Função para inserir uma transação no banco de dados
+// Função para inserir uma transação no banco de dados
+void transacao(MYSQL* conn) {
+    char descricao[255];
+    char tipo[10];
+    double valor;
+    int ano, mes, dia;
 
+    // Solicita dados ao usuário
+    printf("Digite a data da transação (dia mes ano): ");
+    if (scanf_s("%d %d %d", &dia, &mes, &ano) != 3) {
+        printf("Erro ao ler a data da transação.\n");
+        return;
+    }
+
+    printf("Digite a descrição da transação: ");
+    scanf_s(" %[^\n]s", descricao, (unsigned)sizeof(descricao));
+
+    printf("Digite o valor da transação: ");
+    if (scanf_s("%lf", &valor) != 1) {
+        printf("Erro ao ler o valor da transação.\n");
+        return;
+    }
+
+    printf("Digite o tipo da transação (Venda ou Despesa): ");
+    scanf_s(" %9s", tipo, (unsigned)sizeof(tipo));
+
+    // Verifica se o tipo é válido
+    if (strcmp(tipo, "Venda") == 0 || strcmp(tipo, "venda") == 0 || strcmp(tipo, "Despesa") == 0 || strcmp(tipo, "despesa") == 0) {
+        // Se o tipo for válido, prossegue
+    }
+    else {
+        printf("Tipo de transação inválido. Deve ser 'Venda' ou 'Despesa'.\n");
+        return;
+    }
+
+    // Cria a query SQL
+    char query[512];
+    snprintf(query, sizeof(query),
+        "INSERT INTO transacoes (data, descricao, valor, tipo) VALUES ('%02d-%02d-%d', '%s', %.2f, '%s')",
+        ano, mes, dia, descricao, valor, tipo);
+
+    // Executa a query
+    if (mysql_query(conn, query)) {
+        fprintf(stderr, "Erro ao inserir a transação: %s\n", mysql_error(conn));
+    }
+    else {
+        printf("Transação inserida com sucesso!\n");
+    }
+}
 int main() {
     MYSQL* conn = mysql_init(NULL);
     if (conn == NULL) {
@@ -284,11 +334,12 @@ int main() {
             printf("\n1. Cadastrar Produto\n");
             printf("2. Mostrar Estoque\n");
             printf("3. editar produto no estoque\n");
-            printf("4. Sair\n");
+            printf("4. transacao");
+            printf("5. Sair\n");
             printf("Escolha uma opçao: ");
             if (scanf_s("%d", &opcao) != 1) {
                 printf("Erro ao ler a opção.\n");
-                opcao = 3; // Sair em caso de erro de entrada
+                opcao = 5; // Sair em caso de erro de entrada
             }
 
             switch (opcao) {
@@ -299,16 +350,19 @@ int main() {
                 mostrar_estoque(conn);
                 break;
             case 3:
-                editar_produto(conn); 
+                editar_produto(conn);
                 break;
             case 4:
+                transacao(conn);
+                break;
+            case 5:
                 printf("Saindo...\n");
                 break;
             default:
                 printf("Opcao invalida!\n");
                 break;
             }
-        } while (opcao != 4);
+        } while (opcao != 5);
     }
 
     mysql_close(conn);

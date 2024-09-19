@@ -10,13 +10,13 @@ O projeto consiste em um sistema desenvolvido em **C** e **MySQL**, com foco em 
 Este sistema foi desenvolvido como parte do **Projeto Integrado Multidisciplinar 2 (PIM 2)** da **UNIP**, com o objetivo de proporcionar uma solução eficiente para a gestão de operações em pequenas empresas do setor de hortifrúti.
 
 # A Gestão
-Este Projeto está seguindo a metologia ágil Scrum para garantir a revisão e aperfeiçoamento constante para um melhor resultado.
+Este projeto segue a metodologia ágil **Scrum**, garantindo revisão e aperfeiçoamento constantes para alcançar os melhores resultados.
 
 ### Nossas tabelas de gestão podem ser acessadas através dos links:
-Link direto para o projeto -> https://github.com/users/jotaCorsino/projects/1/views/19
-Backlog -> https://tinyurl.com/ywsjcr3d
-Sprint Planning -> https://tinyurl.com/udm8zx9m
-Sprint Backlog -> https://tinyurl.com/3wt2sj6b
-Roadmap -> https://tinyurl.com/mv27jjdc
-Burndown -> https://tinyurl.com/4j7u2dfp
-Daily Scrum -> https://tinyurl.com/nhhu47w3
+- [Link direto para o projeto](https://github.com/users/jotaCorsino/projects/1/views/19)
+- [Backlog](https://tinyurl.com/ywsjcr3d)
+- [Sprint Planning](https://tinyurl.com/udm8zx9m)
+- [Sprint Backlog](https://tinyurl.com/3wt2sj6b)
+- [Roadmap](https://tinyurl.com/mv27jjdc)
+- [Burndown](https://tinyurl.com/4j7u2dfp)
+- [Daily Scrum](https://tinyurl.com/nhhu47w3)

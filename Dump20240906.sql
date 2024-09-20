@@ -89,7 +89,7 @@ CREATE TABLE clientes (
 INSERT INTO clientes (id, nome, email, telefone, endereco)
 VALUES ('1', 'João Silva', 'joao.silva@hotmail.com', '123456789', 'Rua A, 123');
 INSERT INTO clientes (id, nome, email, telefone, endereco)
-VALUES ('2', Mário Augusto, marioaugust@gmail.com, '132425261', 'Rua C, 128');
+VALUES ('2', Mário Augusto, 'marioaugust@gmail.com', '132425261', 'Rua C, 128');
 
 --Dumping shopping for database 'sistec'
 CREATE TABLE compras (

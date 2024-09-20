@@ -14,9 +14,9 @@ Este projeto segue a metodologia ágil **Scrum**, garantindo revisão e aperfei�
 
 ### Nossas tabelas de gestão podem ser acessadas através dos links:
 - [Link direto para o projeto](https://github.com/users/jotaCorsino/projects/1/views/19)
-- [Backlog](https://tinyurl.com/ywsjcr3d)
-- [Sprint Planning](https://tinyurl.com/udm8zx9m)
+- [Backlog](https://github.com/users/jotaCorsino/projects/1/views/19?sliceBy%5Bvalue%5D=1+-+Backlog)
+- [Sprint Planning](https://github.com/users/jotaCorsino/projects/1/views/19?sliceBy%5Bvalue%5D=2+-+Sprint+Planning)
 - [Sprint Backlog](https://github.com/users/jotaCorsino/projects/1/views/2)
-- [Roadmap](https://tinyurl.com/mv27jjdc)
-- [Burndown](https://tinyurl.com/4j7u2dfp)
-- [Daily Scrum](https://tinyurl.com/nhhu47w3)
+- [Roadmap](https://github.com/users/jotaCorsino/projects/1/views/12)
+- [Burndown]()
+- [Daily Scrum](https://github.com/users/jotaCorsino/projects/1/views/19?sliceBy%5Bvalue%5D=3+-+Daily+Scrum+Meeting)

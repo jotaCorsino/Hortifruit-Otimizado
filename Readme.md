@@ -16,7 +16,7 @@ Este projeto segue a metodologia ágil **Scrum**, garantindo revisão e aperfei�
 - [Link direto para o projeto](https://github.com/users/jotaCorsino/projects/1/views/19)
 - [Backlog](https://tinyurl.com/ywsjcr3d)
 - [Sprint Planning](https://tinyurl.com/udm8zx9m)
-- [Sprint Backlog]([https://github.com/jotaCorsino/Hortifruit-Otimizado/milestones?direction=asc&sort=title&state=open](https://github.com/users/jotaCorsino/projects/1/views/2))
+- [Sprint Backlog](https://github.com/users/jotaCorsino/projects/1/views/2)
 - [Roadmap](https://tinyurl.com/mv27jjdc)
 - [Burndown](https://tinyurl.com/4j7u2dfp)
 - [Daily Scrum](https://tinyurl.com/nhhu47w3)

@@ -1,5 +1,3 @@
-CREATE DATABASE  IF NOT EXISTS `sistec` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
-USE `sistec`;
 -- MySQL dump 10.13  Distrib 8.0.38, for Win64 (x86_64)
 --
 -- Host: localhost    Database: sistec
@@ -86,7 +84,7 @@ CREATE TABLE `usuarios` (
   `role` enum('usuario','admin') NOT NULL DEFAULT 'usuario',
   PRIMARY KEY (`id`),
   UNIQUE KEY `nome_usuario` (`nome_usuario`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -95,9 +93,17 @@ CREATE TABLE `usuarios` (
 
 LOCK TABLES `usuarios` WRITE;
 /*!40000 ALTER TABLE `usuarios` DISABLE KEYS */;
-INSERT INTO `usuarios` VALUES (1,'admin','senha123','admin'),(3,'lucas','admin123','admin'),(4,'joao','senha123','admin');
+INSERT INTO `usuarios` VALUES (1,'admin','senha123','admin'),(3,'lucas','lucas01','admin'),(4,'joao','senha123','admin'),(5,'novo_usuario','senha123','usuario'),(8,'pascoal','123456','usuario'),(9,'python','12345','usuario');
 /*!40000 ALTER TABLE `usuarios` ENABLE KEYS */;
 UNLOCK TABLES;
+
+--
+-- Dumping events for database 'sistec'
+--
+
+--
+-- Dumping routines for database 'sistec'
+--
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -108,4 +114,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-09-20 16:50:54
+-- Dump completed on 2024-09-27  0:17:01

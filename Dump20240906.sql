@@ -1,6 +1,6 @@
 -- MySQL dump 10.13  Distrib 8.0.38, for Win64 (x86_64)
 --
--- Host: localhost    Database: sistec
+-- Host: localhost    Database: sistec_
 -- ------------------------------------------------------
 -- Server version	8.0.39
 
@@ -16,58 +16,30 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `controle_estoque`
+-- Table structure for table `estoque`
 --
 
-DROP TABLE IF EXISTS `controle_estoque`;
+DROP TABLE IF EXISTS `estoque`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `controle_estoque` (
-  `id_produto` int NOT NULL AUTO_INCREMENT,
-  `nome_produto` varchar(100) NOT NULL,
-  `descricao` text,
-  `quantidade` int NOT NULL,
-  `preco` decimal(10,2) NOT NULL,
-  `data_ultima_atualizacao` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id_produto`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `controle_estoque`
---
-
-LOCK TABLES `controle_estoque` WRITE;
-/*!40000 ALTER TABLE `controle_estoque` DISABLE KEYS */;
-INSERT INTO `controle_estoque` VALUES (1,'ype flores','detergente flore',20,3.00,'2024-09-11 17:50:26');
-/*!40000 ALTER TABLE `controle_estoque` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `transacoes`
---
-
-DROP TABLE IF EXISTS `transacoes`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `transacoes` (
+CREATE TABLE `estoque` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `data` date NOT NULL,
-  `descricao` varchar(255) NOT NULL,
-  `valor` decimal(10,2) NOT NULL,
-  `tipo` enum('Venda','Despesa') NOT NULL,
+  `nome_produto` varchar(100) NOT NULL,
+  `quantidade` int NOT NULL,
+  `fornecedor` varchar(100) NOT NULL,
+  `data_cadastrada` datetime NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `transacoes`
+-- Dumping data for table `estoque`
 --
 
-LOCK TABLES `transacoes` WRITE;
-/*!40000 ALTER TABLE `transacoes` DISABLE KEYS */;
-INSERT INTO `transacoes` VALUES (1,'2024-09-15','kiwi',25.00,'Venda');
-/*!40000 ALTER TABLE `transacoes` ENABLE KEYS */;
+LOCK TABLES `estoque` WRITE;
+/*!40000 ALTER TABLE `estoque` DISABLE KEYS */;
+INSERT INTO `estoque` VALUES (2,'ype',7,'umbrella inc','2024-10-14 17:49:06');
+/*!40000 ALTER TABLE `estoque` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -81,10 +53,9 @@ CREATE TABLE `usuarios` (
   `id` int NOT NULL AUTO_INCREMENT,
   `nome_usuario` varchar(50) NOT NULL,
   `senha` varchar(255) NOT NULL,
-  `role` enum('usuario','admin') NOT NULL DEFAULT 'usuario',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `nome_usuario` (`nome_usuario`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  `role` enum('admin','caixa','estoquista') NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -93,16 +64,43 @@ CREATE TABLE `usuarios` (
 
 LOCK TABLES `usuarios` WRITE;
 /*!40000 ALTER TABLE `usuarios` DISABLE KEYS */;
-INSERT INTO `usuarios` VALUES (1,'admin','senha123','admin'),(3,'lucas','lucas01','admin'),(4,'joao','senha123','admin'),(5,'novo_usuario','senha123','usuario'),(8,'pascoal','123456','usuario'),(9,'python','12345','usuario');
+INSERT INTO `usuarios` VALUES (1,'admin_user','senha123','admin'),(2,'lucas','senha123','admin'),(5,'teste','senha123','caixa');
 /*!40000 ALTER TABLE `usuarios` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
--- Dumping events for database 'sistec'
+-- Table structure for table `vendas`
+--
+
+DROP TABLE IF EXISTS `vendas`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `vendas` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `nome_produto` varchar(100) NOT NULL,
+  `quantidade` int NOT NULL,
+  `valor` decimal(10,2) NOT NULL,
+  `data_venda` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `vendas`
+--
+
+LOCK TABLES `vendas` WRITE;
+/*!40000 ALTER TABLE `vendas` DISABLE KEYS */;
+INSERT INTO `vendas` VALUES (1,'ype',3,12.00,'2024-10-14 19:11:07'),(2,'ype',6,4.00,'2024-10-14 19:20:36');
+/*!40000 ALTER TABLE `vendas` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Dumping events for database 'sistec_'
 --
 
 --
--- Dumping routines for database 'sistec'
+-- Dumping routines for database 'sistec_'
 --
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -114,4 +112,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-09-27  0:17:01
+-- Dump completed on 2024-10-14 19:23:36

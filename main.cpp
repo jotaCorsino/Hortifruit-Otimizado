@@ -300,7 +300,6 @@ void editar_estoque(MYSQL* conn) {
 
     printf("Produto atualizado com sucesso.\n");
 }
-
 //mostrar os produtos do estoque
 void mostrar_estoque(MYSQL* conn) {
     if (mysql_query(conn, "SELECT * FROM estoque")) {
@@ -358,7 +357,93 @@ void excluir_produto(MYSQL* conn) {
         printf("Produto com ID %d excluído com sucesso.\n", id);
     }
 }
+// Substituir vírgula por ponto em uma string
+void replace_comma_with_dot(char* str) {
+    for (int i = 0; str[i] != '\0'; i++) {
+        if (str[i] == ',') {
+            str[i] = '.';
+        }
+    }
+}
 
+void realizar_venda_abater_estoque(MYSQL* conn) {
+    setlocale(LC_NUMERIC, "C");  // Definir locale para garantir o uso de ponto como separador decimal
+
+    char nome_produto[100];
+    int quantidade;
+    char valor_str[20];  // Valor em string para capturar com vírgula
+    float valor;  // Valor será convertido para float
+    int quantidade_disponivel;
+
+    // Coletar os dados da venda
+    printf("Digite o nome do produto: ");
+    fgets(nome_produto, sizeof(nome_produto), stdin);
+    nome_produto[strcspn(nome_produto, "\n")] = 0;  // Remover o '\n' do fgets
+
+    printf("Digite a quantidade a ser vendida: ");
+    scanf_s("%d", &quantidade);
+    getchar();  // Limpar o buffer do '\n'
+
+    // Verificar se o produto existe no estoque
+    char query_check[256];
+    sprintf_s(query_check, "SELECT quantidade FROM estoque WHERE nome_produto='%s'", nome_produto);
+
+    if (mysql_query(conn, query_check)) {
+        fprintf(stderr, "Erro ao verificar produto no estoque: %s\n", mysql_error(conn));
+        return;
+    }
+
+    MYSQL_RES* resultado = mysql_store_result(conn);
+    if (resultado == NULL || mysql_num_rows(resultado) == 0) {
+        printf("Produto '%s' não encontrado no estoque.\n", nome_produto);
+        mysql_free_result(resultado);
+        return;
+    }
+
+    // Obter a quantidade disponível
+    MYSQL_ROW linha = mysql_fetch_row(resultado);
+    quantidade_disponivel = atoi(linha[0]);  // Converter a string para int
+    mysql_free_result(resultado);
+
+    // Verificar se há quantidade suficiente no estoque
+    if (quantidade_disponivel < quantidade) {
+        printf("Quantidade insuficiente no estoque! Disponível: %d\n", quantidade_disponivel);
+        return;
+    }
+
+    // Solicitar o valor do produto ao operador
+    printf("Digite o valor unitário do produto (em reais): ");
+    fgets(valor_str, sizeof(valor_str), stdin);
+    replace_comma_with_dot(valor_str);  // Substituir vírgula por ponto
+    valor = atof(valor_str);  // Converter string para float
+
+    // Construir a query para inserir a venda no banco de dados
+    char query_insert[512];
+    sprintf_s(query_insert,
+        "INSERT INTO vendas (nome_produto, quantidade, valor) VALUES ('%s', %d, %.2f)",
+        nome_produto, quantidade, valor);  // Valor unitário
+
+    // Depuração para visualizar a query gerada
+    printf("Query gerada: %s\n", query_insert);
+
+    if (mysql_query(conn, query_insert)) {
+        fprintf(stderr, "Erro ao realizar a venda: %s\n", mysql_error(conn));
+        return;
+    }
+
+    // Atualizar o estoque, subtraindo a quantidade vendida
+    char query_update[256];
+    sprintf_s(query_update,
+        "UPDATE estoque SET quantidade = quantidade - %d WHERE nome_produto = '%s'",
+        quantidade, nome_produto);
+
+    if (mysql_query(conn, query_update)) {
+        fprintf(stderr, "Erro ao atualizar o estoque: %s\n", mysql_error(conn));
+        return;
+    }
+
+    printf("Venda realizada com sucesso e estoque atualizado.\n");
+}
 //função de mostrar o menu ao usuario
 void mostrar_menu(const char* role) {
     int opcao;
@@ -373,8 +458,8 @@ void mostrar_menu(const char* role) {
         system("cls");
         printf("\n--- MENU ---\n");
         printf("1. Acesso exclusivo ao Administrador\n");
-        printf("2. Acesso ao Administrador e Estoquista\n");
-        printf("3. Acesso ao Administrador e Caixa\n");
+        printf("2. Acesso ao Estoque\n");
+        printf("3. Acesso ao Caixa\n");
         printf("0. Sair\n");
         printf("Escolha uma opcao: ");
         scanf_s("%d", &opcao);
@@ -385,13 +470,15 @@ void mostrar_menu(const char* role) {
                 int tarefa;
                 fflush(stdin);
                 system("cls");
-                printf("Bem-vindo ao Menu Exclusivo de Administradores!\n");
+                do {
+
+                    printf("Bem-vindo ao Menu Exclusivo de Administradores!\n");
                     printf("1. criar usuário\n");
                     printf("2. Exibir usuários\n");
                     printf("3. Excluir usuário\n");
                     printf("4. editar usuarios\n");
                     printf("5. Sair\n");
-                    if (scanf_s("%d", &tarefa) > 5) {
+                    if (scanf_s("%d", &tarefa)) {
                         printf("Erro ao ler a opcao.\n");
                     }
                     switch (tarefa) {
@@ -438,14 +525,18 @@ void mostrar_menu(const char* role) {
                         printf("aperte qualquer tecla para voltar");
                         _getch();
                         break;
+                    case 5:
+                        printf("saindo...");
                     default: printf("opção inválida");
                     }
-            }
-            else {
-                printf("Acesso negado. Somente Administradores podem acessar esta opção.\n");
-            }
-            break;
 
+
+                } while (tarefa != 5);
+            }
+                else {
+                printf("Acesso negado. Somente Administradores podem acessar esta opção.\n");
+                _getch();
+                }
         case 2:
             if (strcmp(role, "admin") == 0 || strcmp(role, "estoquista") == 0) {
                 int tarefa;
@@ -479,19 +570,47 @@ void mostrar_menu(const char* role) {
                     default:
                         printf("Opção inválida!\n");
                     }
-                } while (opcao != 5);
+                } while (tarefa != 5);  // Corrigido para verificar a variável 'tarefa'
             }
             else {
                 printf("Acesso negado. Somente Administradores ou Estoquistas podem acessar esta opção.\n");
+                _getch();
             }
-            break;
+
 
         case 3:
             if (strcmp(role, "admin") == 0 || strcmp(role, "caixa") == 0) {
-                printf("Bem-vindo ao Menu de Caixa!\n");
+               
+                int tarefa;
+                do {
+                    printf("Bem-vindo ao Menu de Caixa!\n");
+                    printf("\nMenu de Opções:\n");
+                    printf("1. Realizar venda\n");
+                    printf("2. -------\n");
+                    printf("3. Sair\n");
+                    printf("Escolha uma opção: ");
+                    scanf_s("%d", &tarefa);
+                    getchar();
+
+                    switch (tarefa) {
+                    case 1:
+                        realizar_venda_abater_estoque(conn);
+                        break;
+                    case 2:
+                        printf("Teste\n");
+                        break;
+                    case 3:
+                        printf("Saindo...\n");
+                        break;
+                    default:
+                        printf("Opção inválida!\n");
+                    }
+                } while (tarefa != 3);
+
             }
             else {
                 printf("Acesso negado. Somente Administradores ou Caixas podem acessar esta opção.\n");
+                _getch();
             }
             break;
 
@@ -504,6 +623,7 @@ void mostrar_menu(const char* role) {
         }
     } while (opcao != 0);
 }
+
 
 int main() {
     setlocale(LC_ALL, "Portuguese");

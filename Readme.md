@@ -11,30 +11,26 @@ O principal objetivo é fornecer uma solução que automatize e otimize as princ
 - Gerenciar e monitorar o **estoque** em tempo real.
 - Registrar as **vendas** e atualizar automaticamente o estoque.
 - Gerar **relatórios financeiros** detalhados de vendas, lucros e despesas.
-- Facilitar a **gestão de clientes** com histórico de compras e fidelização.
+- Facilitar o **Cadastro de clientes**.
 
 ### Levantamento de Requisitos
 
 #### Controle de Estoque
 
 - **Monitoramento em Tempo Real**: O sistema precisa registrar automaticamente as entradas e saídas de produtos, atualizando o estoque a cada venda.
-- **Relatórios de Estoque**: Geração de relatórios que mostrem o status do estoque e o histórico de movimentações (vendas, reposições, produtos em falta).
 
 #### Gestão de Vendas
 
 - **Registro de Vendas**: Cada venda realizada será registrada automaticamente e sincronizada com o controle de estoque.
-- **Histórico de Vendas**: Manutenção de um histórico detalhado de todas as vendas, incluindo data, produtos vendidos e valor total.
 
 #### Relatórios Financeiros
 
 - **Lucro e Despesa**: Cálculo automático do lucro com base nas vendas e despesas operacionais.
-- **Previsões de Receita**: Com base no histórico de vendas, o sistema deve fornecer previsões de receita e identificar períodos de maior ou menor demanda.
 - **Gestão de Despesas**: Registro de todas as despesas operacionais, facilitando o controle financeiro do negócio.
 
 #### Gestão de Clientes
 
-- **Cadastro de Clientes**: Armazenamento de informações detalhadas dos clientes, incluindo histórico de compras.
-- **Histórico de Compras**: Permitir a visualização do histórico completo de compras de cada cliente para personalizar o atendimento.
+- **Cadastro de Clientes**: Armazenamento de informações detalhadas dos clientes.
 
 ---
 

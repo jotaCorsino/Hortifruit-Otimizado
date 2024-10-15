@@ -1,3 +1,5 @@
+CREATE DATABASE  IF NOT EXISTS `sistec_` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
+USE `sistec_`;
 -- MySQL dump 10.13  Distrib 8.0.38, for Win64 (x86_64)
 --
 -- Host: localhost    Database: sistec_
@@ -14,6 +16,32 @@
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `despesas`
+--
+
+DROP TABLE IF EXISTS `despesas`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `despesas` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `descricao` varchar(255) NOT NULL,
+  `valor` decimal(10,2) NOT NULL,
+  `data_despesa` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `despesas`
+--
+
+LOCK TABLES `despesas` WRITE;
+/*!40000 ALTER TABLE `despesas` DISABLE KEYS */;
+INSERT INTO `despesas` VALUES (1,'conta de luz',200.00,'2024-10-15 14:37:06');
+/*!40000 ALTER TABLE `despesas` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `estoque`
@@ -38,7 +66,7 @@ CREATE TABLE `estoque` (
 
 LOCK TABLES `estoque` WRITE;
 /*!40000 ALTER TABLE `estoque` DISABLE KEYS */;
-INSERT INTO `estoque` VALUES (2,'ype',7,'umbrella inc','2024-10-14 17:49:06');
+INSERT INTO `estoque` VALUES (2,'ype',3,'umbrella inc','2024-10-14 17:49:06');
 /*!40000 ALTER TABLE `estoque` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -82,7 +110,7 @@ CREATE TABLE `vendas` (
   `valor` decimal(10,2) NOT NULL,
   `data_venda` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -91,7 +119,7 @@ CREATE TABLE `vendas` (
 
 LOCK TABLES `vendas` WRITE;
 /*!40000 ALTER TABLE `vendas` DISABLE KEYS */;
-INSERT INTO `vendas` VALUES (1,'ype',3,12.00,'2024-10-14 19:11:07'),(2,'ype',6,4.00,'2024-10-14 19:20:36');
+INSERT INTO `vendas` VALUES (1,'ype',3,12.00,'2024-10-14 19:11:07'),(2,'ype',6,4.00,'2024-10-14 19:20:36'),(3,'ype',4,12.00,'2024-10-15 14:00:38');
 /*!40000 ALTER TABLE `vendas` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -112,4 +140,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-10-14 19:23:36
+-- Dump completed on 2024-10-15 17:00:16

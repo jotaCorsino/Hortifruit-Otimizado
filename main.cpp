@@ -9,7 +9,7 @@
 void conectar_ao_banco(MYSQL* conn) {//mysql* conn, o parametro con é usado para conectar com o banco de dados;
     // Conectar ao banco de dados;; local host== rodando na minha maquina;; lucas== meu nome de usario no banco;; password== é a senha para eu logar;; sistec== nome do banco de dados
     if (mysql_real_connect(conn, "localhost", "lucas", "password", "sistec_", 0, NULL, 0) == NULL) {//my sql_real_connect é a função que tenta se conectar ao banco usando os parametros
-        fprintf(stderr, "Erro na conexão: %s\n", mysql_error(conn));//mysql error da imprime uma msg de erro pro usuario 
+        fprintf(stderr, "Erro na conexão: %s\n", mysql_error(conn));//mysql error imprime uma msg de erro pro usuario 
         mysql_close(conn);//e o mysql_close fecha a conexão
         exit(1);
     }
@@ -20,12 +20,12 @@ void to_lowercase(char* str) {
         str[i] = tolower(str[i]);
     }
 }
-//verificar se a senha e usuario digitados sao os mesmos cadastrados
+// verificar se a senha e o usuário digitados são os mesmos cadastrados
 int verificar_usuario(MYSQL* conn, const char* nome_usuario, const char* senha) {
     MYSQL_STMT* stmt;
     MYSQL_BIND bind[2], result[1];
     char query[] = "SELECT role FROM usuarios WHERE nome_usuario = ? AND senha = ?";
-    char role[20] = "";  // Buffer para armazenar o valor do papel (role)
+    char role[20] = "";
 
     stmt = mysql_stmt_init(conn);
     if (stmt == NULL) {
@@ -62,10 +62,9 @@ int verificar_usuario(MYSQL* conn, const char* nome_usuario, const char* senha) 
         mysql_stmt_close(stmt);
         return -1;
     }
-
+    
     memset(result, 0, sizeof(result));
 
-    // Vincular o resultado da consulta
     result[0].buffer_type = MYSQL_TYPE_STRING;
     result[0].buffer = role;
     result[0].buffer_length = sizeof(role);
@@ -82,42 +81,41 @@ int verificar_usuario(MYSQL* conn, const char* nome_usuario, const char* senha) 
         return -1;
     }
 
-    // Verificar se há linhas retornadas
     if (mysql_stmt_fetch(stmt) == MYSQL_NO_DATA) {
         printf("Usuario ou senha incorretos.\n");
         mysql_stmt_close(stmt);
         return 0;
     }
 
-    // Verificar o papel do usuário
     if (strcmp(role, "admin") == 0) {
         printf("Login bem-sucedido! Bem-vindo, Administrador.\n");
         mysql_stmt_close(stmt);
-        return 1; // Administrador
+        return 1;
     }
     else if (strcmp(role, "caixa") == 0) {
         printf("Login bem-sucedido! Bem-vindo, Caixa.\n");
         mysql_stmt_close(stmt);
-        return 2; // Caixa
+        return 2;
     }
     else if (strcmp(role, "estoquista") == 0) {
         printf("Login bem-sucedido! Bem-vindo, Estoquista.\n");
         mysql_stmt_close(stmt);
-        return 3; // Estoquista
+        return 3;
     }
     else {
         printf("Role desconhecido. Acesso negado.\n");
         mysql_stmt_close(stmt);
-        return -1; // Role desconhecido
+        return -1;
     }
 }
-//função pra criar usarios novos
+
+// função para cadastrar novos usuários
 int cadastrar_usuario(MYSQL* conn, const char* nome_usuario, const char* senha, const char* role) {
     MYSQL_STMT* stmt;
     MYSQL_BIND bind[3];
     char query[] = "INSERT INTO usuarios (nome_usuario, senha, role) VALUES (?, ?, ?)";
 
-    stmt = mysql_stmt_init(conn);  // Inicializar o statement
+    stmt = mysql_stmt_init(conn);
     if (stmt == NULL) {
         fprintf(stderr, "Erro ao inicializar a consulta: %s\n", mysql_error(conn));
         return -1;
@@ -129,32 +127,26 @@ int cadastrar_usuario(MYSQL* conn, const char* nome_usuario, const char* senha, 
         return -1;
     }
 
-    // Inicializar o array de bind
     memset(bind, 0, sizeof(bind));
 
-    // Nome do usuário
     bind[0].buffer_type = MYSQL_TYPE_STRING;
     bind[0].buffer = (char*)nome_usuario;
     bind[0].buffer_length = strlen(nome_usuario);
 
-    // Senha
     bind[1].buffer_type = MYSQL_TYPE_STRING;
     bind[1].buffer = (char*)senha;
     bind[1].buffer_length = strlen(senha);
 
-    // Role (admin, caixa, estoquista)
     bind[2].buffer_type = MYSQL_TYPE_STRING;
     bind[2].buffer = (char*)role;
     bind[2].buffer_length = strlen(role);
 
-    // Associar os parâmetros
     if (mysql_stmt_bind_param(stmt, bind) != 0) {
         fprintf(stderr, "Erro ao associar parametros: %s\n", mysql_stmt_error(stmt));
         mysql_stmt_close(stmt);
         return -1;
     }
 
-    // Executar a consulta
     if (mysql_stmt_execute(stmt) != 0) {
         fprintf(stderr, "Erro ao executar a consulta: %s\n", mysql_stmt_error(stmt));
         mysql_stmt_close(stmt);
@@ -163,8 +155,9 @@ int cadastrar_usuario(MYSQL* conn, const char* nome_usuario, const char* senha, 
 
     printf("Usuário cadastrado com sucesso!\n");
     mysql_stmt_close(stmt);
-    return 1;  // Sucesso
+    return 1;
 }
+
 //função para ver todos os usuarios existentes
 int buscar_usuarios(MYSQL* conn) {
     if (mysql_query(conn, "SELECT * FROM usuarios")) {
@@ -215,31 +208,30 @@ int excluir_usuario(MYSQL* conn, int usuario_id) {
     printf("Usuario com ID %d excluido com sucesso.\n", usuario_id);
     return 0;
 }
-//inserir produto no estoque
+// Função para inserir produto no estoque
 void inserir_produto(MYSQL* conn) {
     char nome_produto[100];
     int quantidade;
     char fornecedor[100];
 
-    // Coletar os dados do produto
     printf("Digite o nome do produto: ");
     fgets(nome_produto, sizeof(nome_produto), stdin);
-    nome_produto[strcspn(nome_produto, "\n")] = 0;  // Remover o '\n' que o fgets inclui
+    nome_produto[strcspn(nome_produto, "\n")] = 0;
+    to_lowercase(nome_produto);  // Convertendo para minúsculo
 
     printf("Digite a quantidade: ");
     scanf_s("%d", &quantidade);
-    getchar(); // Limpar o buffer do '\n'
+    getchar();
 
     printf("Digite o nome do fornecedor: ");
     fgets(fornecedor, sizeof(fornecedor), stdin);
-    fornecedor[strcspn(fornecedor, "\n")] = 0;  // Remover o '\n' que o fgets inclui
+    fornecedor[strcspn(fornecedor, "\n")] = 0;
+    to_lowercase(fornecedor);  // Convertendo para minúsculo
 
-    // Construir a query para inserir no banco de dados
     char query[256];
     sprintf_s(query, "INSERT INTO estoque (nome_produto, quantidade, fornecedor, data_cadastrada) VALUES ('%s', %d, '%s', NOW())",
         nome_produto, quantidade, fornecedor);
 
-    // Executar a query
     if (mysql_query(conn, query)) {
         fprintf(stderr, "Erro ao inserir produto: %s\n", mysql_error(conn));
         return;
@@ -365,7 +357,7 @@ void replace_comma_with_dot(char* str) {
         }
     }
 }
-
+//função que realiza a venda e tira automaticamento o produto do estoque
 void realizar_venda_abater_estoque(MYSQL* conn) {
     setlocale(LC_NUMERIC, "C");  // Definir locale para garantir o uso de ponto como separador decimal
 
@@ -421,7 +413,7 @@ void realizar_venda_abater_estoque(MYSQL* conn) {
     char query_insert[512];
     sprintf_s(query_insert,
         "INSERT INTO vendas (nome_produto, quantidade, valor) VALUES ('%s', %d, %.2f)",
-        nome_produto, quantidade, valor);  // Valor unitário
+        nome_produto, quantidade, valor * quantidade);  // Valor = quantidade do produto vendido + valor por unidade;
 
     // Depuração para visualizar a query gerada
     printf("Query gerada: %s\n", query_insert);
@@ -444,6 +436,144 @@ void realizar_venda_abater_estoque(MYSQL* conn) {
 
     printf("Venda realizada com sucesso e estoque atualizado.\n");
 }
+//função para mostrar as vendas feitas
+void mostrar_vendas(MYSQL* conn) {
+    // Query SQL para selecionar os dados da tabela de vendas
+    const char* query = "SELECT nome_produto, quantidade, valor, data_venda FROM vendas";
+
+    // Executar a consulta
+    if (mysql_query(conn, query)) {
+        fprintf(stderr, "Erro ao buscar dados das vendas: %s\n", mysql_error(conn));
+        return;
+    }
+
+    // Armazenar o resultado da consulta
+    MYSQL_RES* resultado = mysql_store_result(conn);
+    if (resultado == NULL) {
+        fprintf(stderr, "Erro ao armazenar resultado: %s\n", mysql_error(conn));
+        return;
+    }
+
+    // Verificar o número de linhas retornadas
+    int num_rows = mysql_num_rows(resultado);
+    if (num_rows == 0) {
+        printf("Não há registros de vendas.\n");
+    }
+    else {
+        // Exibir os dados das vendas
+        printf("+--------------------------------------------------------------------------------------+\n");
+        printf("|  Nome do Produto  | Quantidade |   Valor Total   |         Data da Venda             |\n");
+        printf("+--------------------------------------------------------------------------------------+\n");
+
+        MYSQL_ROW row;
+        while ((row = mysql_fetch_row(resultado))) {
+            printf("| %-17s | %-10s | R$ %-12s | %-25s |\n", row[0], row[1], row[2], row[3]);
+        }
+
+        printf("+--------------------------------------------------------------------------------------+\n");
+    }
+
+    // Liberar o resultado
+    mysql_free_result(resultado);
+}
+// Função para registrar uma despesa
+void registrar_despesa(MYSQL* conn) {
+    setlocale(LC_NUMERIC, "C");  // Definir locale para garantir o uso de ponto como separador decimal
+    char descricao[255];
+    float valor;
+    // Coletar os dados da despesa do usuário
+    printf("Digite a descrição da despesa: \n");
+    getchar(); // Limpar o '\n' residual no buffer após o scanf anterior
+    fgets(descricao, sizeof(descricao), stdin);
+    descricao[strcspn(descricao, "\n")] = '\0';  // Remover o '\n' no final da string
+
+    printf("Digite o valor da despesa: ");
+    fflush(stdin);
+    scanf_s("%f", &valor);
+
+    // Criar a query para inserir a despesa na tabela
+    char query[512];
+    sprintf_s(query, "INSERT INTO despesas (descricao, valor) VALUES ('%s', %.2f)", descricao, valor);
+
+    // Executar a query
+    if (mysql_query(conn, query)) {
+        fprintf(stderr, "Erro ao registrar despesa: %s\n", mysql_error(conn));
+    } else {
+        printf("Despesa registrada com sucesso!\n");
+    }
+}
+void mostrar_despesas(MYSQL* conn) {
+    // Query SQL para selecionar os dados da tabela de despesas
+    const char* query = "SELECT descricao, valor, data_despesa FROM despesas";
+
+    // Executar a consulta
+    if (mysql_query(conn, query)) {
+        fprintf(stderr, "Erro ao buscar dados das despesas: %s\n", mysql_error(conn));
+        return;
+    }
+
+    // Armazenar o resultado da consulta
+    MYSQL_RES* resultado = mysql_store_result(conn);
+    if (resultado == NULL) {
+        fprintf(stderr, "Erro ao armazenar resultado: %s\n", mysql_error(conn));
+        return;
+    }
+
+    // Verificar o número de linhas retornadas
+    int num_rows = mysql_num_rows(resultado);
+    if (num_rows == 0) {
+        printf("Não há registros de despesas.\n");
+    }
+    else {
+        // Exibir os dados das despesas
+        printf("+------------------------------------------------------+\n");
+        printf("|  Descrição da Despesa  |   Valor   |    Data da Despesa   |\n");
+        printf("+------------------------------------------------------+\n");
+
+        MYSQL_ROW row;
+        while ((row = mysql_fetch_row(resultado))) {
+            printf("| %-20s | R$ %-8s | %-18s |\n", row[0], row[1], row[2]);
+        }
+
+        printf("+------------------------------------------------------+\n");
+    }
+
+    // Liberar o resultado
+    mysql_free_result(resultado);
+}
+void mostrar_lucro(MYSQL* conn) {
+    // Query SQL para selecionar os dados da tabela de vendas
+    const char* query = "SELECT SUM(valor) FROM vendas";
+
+    // Executar a consulta
+    if (mysql_query(conn, query)) {
+        fprintf(stderr, "Erro ao buscar dados das vendas: %s\n", mysql_error(conn));
+        return;
+    }
+
+    // Armazenar o resultado da consulta
+    MYSQL_RES* resultado = mysql_store_result(conn);
+    if (resultado == NULL) {
+        fprintf(stderr, "Erro ao armazenar resultado: %s\n", mysql_error(conn));
+        return;
+    }
+
+    // Verificar se há vendas registradas
+    MYSQL_ROW row = mysql_fetch_row(resultado);
+    if (row[0] == NULL) {
+        printf("Não há vendas registradas.\n");
+    }
+    else {
+        // Exibir o lucro total
+        printf("Lucro total das vendas: R$ %.2f\n", atof(row[0]));
+    }
+
+    // Liberar o resultado
+    mysql_free_result(resultado);
+}
+
+
+
 //função de mostrar o menu ao usuario
 void mostrar_menu(const char* role) {
     int opcao;
@@ -455,7 +585,7 @@ void mostrar_menu(const char* role) {
     conectar_ao_banco(conn);
 
     do {
-        system("cls");
+        system("cls"); // limpa a tela
         printf("\n--- MENU ---\n");
         printf("1. Acesso exclusivo ao Administrador\n");
         printf("2. Acesso ao Estoque\n");
@@ -469,52 +599,58 @@ void mostrar_menu(const char* role) {
             if (strcmp(role, "admin") == 0) {
                 int tarefa;
                 fflush(stdin);
-                system("cls");
                 do {
-
+                    system("cls");
                     printf("Bem-vindo ao Menu Exclusivo de Administradores!\n");
                     printf("1. criar usuário\n");
                     printf("2. Exibir usuários\n");
                     printf("3. Excluir usuário\n");
                     printf("4. editar usuarios\n");
-                    printf("5. Sair\n");
-                    if (scanf_s("%d", &tarefa)) {
+                    printf("5. criar despesa\n");
+                    printf("6. mostrar lucro(vendas)\n");
+                    printf("7. mostrar despesas\n");
+                    printf("8. Sair\n");
+                    fflush(stdin);
+                    if (!scanf_s("%d", &tarefa)) { 
                         printf("Erro ao ler a opcao.\n");
                     }
                     switch (tarefa) {
-                    case 1:
+                    case 1: {
                         char nome_usuario[50];
                         char senha[50];
-                        char role[20];
+                        char novo_role[20]; 
                         // Coletar informações do novo usuário
                         printf("Digite o nome do usuário a ser cadastrado: ");
+                        fflush(stdin);
                         scanf_s("%49s", nome_usuario);  // Limitando a entrada a 49 caracteres para evitar overflow
 
                         printf("Digite a senha para o novo usuário: ");
+                        fflush(stdin);
                         scanf_s("%49s", senha);
 
                         // Pedir o tipo de usuário
                         printf("Digite o tipo de usuário (admin, caixa, estoquista): ");
-                        scanf_s("%19s", role);
+                        fflush(stdin);
+                        scanf_s("%19s", novo_role);
 
                         // Chamar a função para cadastrar o usuário no banco de dados
-                        if (cadastrar_usuario(conn, nome_usuario, senha, role) == 1) {
+                        if (cadastrar_usuario(conn, nome_usuario, senha, novo_role) == 1) {
                             printf("Usuário cadastrado com sucesso!\n");
                         }
                         else {
                             printf("Erro ao cadastrar o usuário.\n");
                         }
-
-                        // Fechar a conexão com o banco de dados
-                        mysql_close(conn);
                         break;
+                    }
                     case 2:
+                      
                         fflush(stdin);
                         buscar_usuarios(conn);
                         printf("aperte qualquer tecla pra voltar");
                         _getch();
                         break;
-                    case 3:
+                    case 3: {
+                       
                         fflush(stdin);
                         int usuario_id;
                         printf_s("\nDigite o ID do usuário que deseja excluir: ");
@@ -525,27 +661,44 @@ void mostrar_menu(const char* role) {
                         printf("aperte qualquer tecla para voltar");
                         _getch();
                         break;
-                    case 5:
-                        printf("saindo...");
-                    default: printf("opção inválida");
                     }
-
-
-                } while (tarefa != 5);
+                    case 5:
+                        fflush(stdin);
+                        registrar_despesa(conn);
+                        printf("Aperte qualquer tecla para voltar ao menu!");
+                        _getch();
+                        break;
+                    case 6:
+                        mostrar_lucro(conn);
+                        printf("Aperte qualquer tecla para voltar ao menu!");
+                        _getch();
+                        break;
+                    case 7:
+                        mostrar_despesas(conn);
+                        printf("Aperte qualquer tecla para voltar ao menu!");
+                        _getch();
+                        break;
+                    default:
+                        printf("opção inválida");
+                    }
+                } while (tarefa != 8);
             }
-                else {
+            else {
                 printf("Acesso negado. Somente Administradores podem acessar esta opção.\n");
                 _getch();
-                }
+            }
+            break; 
         case 2:
+            
             if (strcmp(role, "admin") == 0 || strcmp(role, "estoquista") == 0) {
                 int tarefa;
                 do {
+                    system("cls");
                     printf("\nMenu de Opções:\n");
-                    printf("1. Inserir produto\n");
-                    printf("2. Editar produto\n");
-                    printf("3. Mostrar estoque\n");
-                    printf("4. Excluir produto\n");
+                    printf("1. Inserir produto ao estoque\n");
+                    printf("2. Editar produto do estoque\n");
+                    printf("3. Mostrar produtos do estoque\n");
+                    printf("4. Excluir produto do estoque\n");
                     printf("5. Sair\n");
                     printf("Escolha uma opção: ");
                     scanf_s("%d", &tarefa);
@@ -570,23 +723,23 @@ void mostrar_menu(const char* role) {
                     default:
                         printf("Opção inválida!\n");
                     }
-                } while (tarefa != 5);  // Corrigido para verificar a variável 'tarefa'
+                } while (tarefa != 5);
             }
             else {
                 printf("Acesso negado. Somente Administradores ou Estoquistas podem acessar esta opção.\n");
                 _getch();
             }
-
-
+            break; 
         case 3:
+           
             if (strcmp(role, "admin") == 0 || strcmp(role, "caixa") == 0) {
-               
                 int tarefa;
                 do {
+                    system("cls");
                     printf("Bem-vindo ao Menu de Caixa!\n");
                     printf("\nMenu de Opções:\n");
                     printf("1. Realizar venda\n");
-                    printf("2. -------\n");
+                    printf("2. mostrar relatório de vendas\n");
                     printf("3. Sair\n");
                     printf("Escolha uma opção: ");
                     scanf_s("%d", &tarefa);
@@ -597,7 +750,7 @@ void mostrar_menu(const char* role) {
                         realizar_venda_abater_estoque(conn);
                         break;
                     case 2:
-                        printf("Teste\n");
+                        mostrar_vendas(conn);
                         break;
                     case 3:
                         printf("Saindo...\n");
@@ -606,25 +759,23 @@ void mostrar_menu(const char* role) {
                         printf("Opção inválida!\n");
                     }
                 } while (tarefa != 3);
-
             }
             else {
                 printf("Acesso negado. Somente Administradores ou Caixas podem acessar esta opção.\n");
                 _getch();
             }
             break;
-
         case 0:
             printf("Saindo...\n");
             break;
-
         default:
             printf("Opcao invalida!\n");
         }
     } while (opcao != 0);
+
+    // Fechar a conexão ao banco de dados ao sair
+    mysql_close(conn);
 }
-
-
 int main() {
     setlocale(LC_ALL, "Portuguese");
     MYSQL* conn = mysql_init(NULL);

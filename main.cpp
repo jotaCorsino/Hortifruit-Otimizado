@@ -108,7 +108,6 @@ int verificar_usuario(MYSQL* conn, const char* nome_usuario, const char* senha) 
         return -1;
     }
 }
-
 // função para cadastrar novos usuários
 int cadastrar_usuario(MYSQL* conn, const char* nome_usuario, const char* senha, const char* role) {
     MYSQL_STMT* stmt;
@@ -157,7 +156,6 @@ int cadastrar_usuario(MYSQL* conn, const char* nome_usuario, const char* senha, 
     mysql_stmt_close(stmt);
     return 1;
 }
-
 //função para ver todos os usuarios existentes
 int buscar_usuarios(MYSQL* conn) {
     if (mysql_query(conn, "SELECT * FROM usuarios")) {
@@ -571,9 +569,177 @@ void mostrar_lucro(MYSQL* conn) {
     // Liberar o resultado
     mysql_free_result(resultado);
 }
+typedef struct {
+    char nome_cliente[100];
+    char email[100];
+    char telefone[20];
+} Cliente;
+// Função para inserir um cliente no banco de dados
+void inserir_cliente(MYSQL* conn) {
+    Cliente cliente;
 
+    // Coletar informações do cliente
+    printf("Digite o nome do cliente: ");
+    fgets(cliente.nome_cliente, sizeof(cliente.nome_cliente), stdin);
+    cliente.nome_cliente[strcspn(cliente.nome_cliente, "\n")] = 0;  // Remover o '\n'
 
+    printf("Digite o email do cliente: ");
+    fgets(cliente.email, sizeof(cliente.email), stdin);
+    cliente.email[strcspn(cliente.email, "\n")] = 0;
 
+    printf("Digite o telefone do cliente: ");
+    fgets(cliente.telefone, sizeof(cliente.telefone), stdin);
+    cliente.telefone[strcspn(cliente.telefone, "\n")] = 0;
+
+    // Query para inserir no banco de dados
+    char query[256];
+    sprintf_s(query, "INSERT INTO clientes (nome_cliente, email, telefone) VALUES ('%s', '%s', '%s')",
+        cliente.nome_cliente, cliente.email, cliente.telefone);
+
+    // Executar a query
+    if (mysql_query(conn, query)) {
+        fprintf(stderr, "Erro ao inserir cliente: %s\n", mysql_error(conn));
+        return;
+    }
+
+    printf("Cliente inserido com sucesso!\n");
+}
+
+// Função para editar um cliente existente no banco de dados
+void editar_cliente(MYSQL* conn) {
+    int id;
+    Cliente cliente;
+
+    // Solicitar o ID do cliente a ser editado
+    printf("Digite o ID do cliente a ser editado: ");
+    scanf_s("%d", &id);
+    getchar();  // Limpar o buffer
+
+    // Coletar novas informações do cliente
+    printf("Digite o novo nome do cliente: ");
+    fgets(cliente.nome_cliente, sizeof(cliente.nome_cliente), stdin);
+    cliente.nome_cliente[strcspn(cliente.nome_cliente, "\n")] = 0;  // Remover o '\n'
+
+    printf("Digite o novo email do cliente: ");
+    fgets(cliente.email, sizeof(cliente.email), stdin);
+    cliente.email[strcspn(cliente.email, "\n")] = 0;
+
+    printf("Digite o novo telefone do cliente: ");
+    fgets(cliente.telefone, sizeof(cliente.telefone), stdin);
+    cliente.telefone[strcspn(cliente.telefone, "\n")] = 0;
+
+    // Query para atualizar as informações do cliente
+    char query[256];
+    sprintf_s(query, "UPDATE clientes SET nome_cliente='%s', email='%s', telefone='%s' WHERE id=%d",
+        cliente.nome_cliente, cliente.email, cliente.telefone, id);
+
+    // Executar a query
+    if (mysql_query(conn, query)) {
+        fprintf(stderr, "Erro ao editar cliente: %s\n", mysql_error(conn));
+        return;
+    }
+
+    printf("Cliente atualizado com sucesso!\n");
+}
+
+// Função para excluir um cliente do banco de dados
+void excluir_cliente(MYSQL* conn) {
+    int id;
+
+    // Solicitar o ID do cliente a ser excluído
+    printf("Digite o ID do cliente que deseja excluir: ");
+    scanf_s("%d", &id);
+    getchar();  // Limpar o buffer
+
+    // Query para excluir o cliente
+    char query[256];
+    sprintf_s(query, "DELETE FROM clientes WHERE id = %d", id);
+
+    // Executar a query
+    if (mysql_query(conn, query)) {
+        fprintf(stderr, "Erro ao excluir cliente: %s\n", mysql_error(conn));
+        return;
+    }
+
+    if (mysql_affected_rows(conn) == 0) {
+        printf("Nenhum cliente encontrado com o ID %d\n", id);
+    }
+    else {
+        printf("Cliente com ID %d excluído com sucesso.\n", id);
+    }
+}
+
+// Função para mostrar todos os clientes no banco de dados
+void mostrar_clientes(MYSQL* conn) {
+    // Query para buscar todos os clientes
+    if (mysql_query(conn, "SELECT * FROM clientes")) {
+        fprintf(stderr, "Erro ao buscar os clientes: %s\n", mysql_error(conn));
+        return;
+    }
+
+    MYSQL_RES* resultado = mysql_store_result(conn);
+    if (resultado == NULL) {
+        fprintf(stderr, "Erro ao armazenar resultado: %s\n", mysql_error(conn));
+        return;
+    }
+
+    MYSQL_ROW linha;
+    MYSQL_FIELD* campos = mysql_fetch_fields(resultado);
+    unsigned int num_campos = mysql_num_fields(resultado);
+
+    // Imprimir cabeçalho
+    for (unsigned int i = 0; i < num_campos; i++) {
+        printf("%-20s", campos[i].name);
+    }
+    printf("\n");
+
+    // Imprimir linhas do resultado
+    while ((linha = mysql_fetch_row(resultado))) {
+        for (unsigned int i = 0; i < num_campos; i++) {
+            printf("%-20s", linha[i] ? linha[i] : "NULL");
+        }
+        printf("\n");
+    }
+
+    mysql_free_result(resultado);
+}
+
+// Função principal para gerenciar clientes para a função menu nao ficar tao grande :)
+void clientes(MYSQL* conn) {
+    int opcao;
+
+    do {
+        printf("\n--- Menu de Clientes ---\n");
+        printf("1. Inserir novo cliente\n");
+        printf("2. Editar cliente\n");
+        printf("3. Excluir cliente\n");
+        printf("4. Mostrar todos os clientes\n");
+        printf("5. Sair\n");
+        printf("Escolha uma opção: ");
+        scanf_s("%d", &opcao);
+        getchar();  // Limpar o buffer
+
+        switch (opcao) {
+        case 1:
+            inserir_cliente(conn);
+            break;
+        case 2:
+            editar_cliente(conn);
+            break;
+        case 3:
+            excluir_cliente(conn);
+            break;
+        case 4:
+            mostrar_clientes(conn);
+            break;
+        case 5:
+            printf("Saindo do menu de clientes...\n");
+            break;
+        default:
+            printf("Opção inválida!\n");
+        }
+    } while (opcao != 5);
+}
 //função de mostrar o menu ao usuario
 void mostrar_menu(const char* role) {
     int opcao;
@@ -643,14 +809,12 @@ void mostrar_menu(const char* role) {
                         break;
                     }
                     case 2:
-                      
                         fflush(stdin);
                         buscar_usuarios(conn);
                         printf("aperte qualquer tecla pra voltar");
                         _getch();
                         break;
                     case 3: {
-                       
                         fflush(stdin);
                         int usuario_id;
                         printf_s("\nDigite o ID do usuário que deseja excluir: ");
@@ -740,7 +904,8 @@ void mostrar_menu(const char* role) {
                     printf("\nMenu de Opções:\n");
                     printf("1. Realizar venda\n");
                     printf("2. mostrar relatório de vendas\n");
-                    printf("3. Sair\n");
+                    printf("3. Menu de clientes\n");
+                    printf("4. sair \n");
                     printf("Escolha uma opção: ");
                     scanf_s("%d", &tarefa);
                     getchar();
@@ -753,12 +918,12 @@ void mostrar_menu(const char* role) {
                         mostrar_vendas(conn);
                         break;
                     case 3:
-                        printf("Saindo...\n");
+                        clientes(conn);
                         break;
                     default:
                         printf("Opção inválida!\n");
                     }
-                } while (tarefa != 3);
+                } while (tarefa != 4);
             }
             else {
                 printf("Acesso negado. Somente Administradores ou Caixas podem acessar esta opção.\n");
@@ -776,6 +941,7 @@ void mostrar_menu(const char* role) {
     // Fechar a conexão ao banco de dados ao sair
     mysql_close(conn);
 }
+
 int main() {
     setlocale(LC_ALL, "Portuguese");
     MYSQL* conn = mysql_init(NULL);
@@ -806,7 +972,6 @@ int main() {
     else if (login_status == 2) {
         printf("Digite o tipo de usuário (caixa, estoquista): ");
         scanf_s("%19s", role);
-
         // Converter o valor de role para minúsculas
         to_lowercase(role);
     }
@@ -815,10 +980,8 @@ int main() {
         mysql_close(conn);
         return -1;
     }
-
     // Mostrar menu
     mostrar_menu(role);
-
     // Fechar a conexão com o banco de dados
     mysql_close(conn);
 

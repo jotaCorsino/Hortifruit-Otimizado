@@ -8,7 +8,7 @@
 //função para conectar ao banco de dados
 void conectar_ao_banco(MYSQL* conn) {//mysql* conn, o parametro con é usado para conectar com o banco de dados;
     // Conectar ao banco de dados;; local host== rodando na minha maquina;; lucas== meu nome de usario no banco;; password== é a senha para eu logar;; sistec== nome do banco de dados
-    if (mysql_real_connect(conn, "localhost", "lucas", "password", "sistec_", 0, NULL, 0) == NULL) {//my sql_real_connect é a função que tenta se conectar ao banco usando os parametros
+    if (mysql_real_connect(conn, "localhost", "root", "password", "sistec_", 0, NULL, 0) == NULL) {//my sql_real_connect é a função que tenta se conectar ao banco usando os parametros
         fprintf(stderr, "Erro na conexão: %s\n", mysql_error(conn));//mysql error imprime uma msg de erro pro usuario 
         mysql_close(conn);//e o mysql_close fecha a conexão
         exit(1);
@@ -62,7 +62,7 @@ int verificar_usuario(MYSQL* conn, const char* nome_usuario, const char* senha) 
         mysql_stmt_close(stmt);
         return -1;
     }
-    
+
     memset(result, 0, sizeof(result));
 
     result[0].buffer_type = MYSQL_TYPE_STRING;
@@ -496,7 +496,8 @@ void registrar_despesa(MYSQL* conn) {
     // Executar a query
     if (mysql_query(conn, query)) {
         fprintf(stderr, "Erro ao registrar despesa: %s\n", mysql_error(conn));
-    } else {
+    }
+    else {
         printf("Despesa registrada com sucesso!\n");
     }
 }
@@ -573,6 +574,7 @@ typedef struct {
     char nome_cliente[100];
     char email[100];
     char telefone[20];
+    char endereco[255];
 } Cliente;
 // Função para inserir um cliente no banco de dados
 void inserir_cliente(MYSQL* conn) {
@@ -582,19 +584,23 @@ void inserir_cliente(MYSQL* conn) {
     printf("Digite o nome do cliente: ");
     fgets(cliente.nome_cliente, sizeof(cliente.nome_cliente), stdin);
     cliente.nome_cliente[strcspn(cliente.nome_cliente, "\n")] = 0;  // Remover o '\n'
-
+    fflush(stdin);
     printf("Digite o email do cliente: ");
     fgets(cliente.email, sizeof(cliente.email), stdin);
     cliente.email[strcspn(cliente.email, "\n")] = 0;
-
+    fflush(stdin);
     printf("Digite o telefone do cliente: ");
     fgets(cliente.telefone, sizeof(cliente.telefone), stdin);
     cliente.telefone[strcspn(cliente.telefone, "\n")] = 0;
+    fflush(stdin);
+    printf("Digite o endereço do cliente: ");
+    fgets(cliente.endereco, sizeof(cliente.endereco), stdin);
+    cliente.endereco[strcspn(cliente.endereco, "\n")] = 0;
 
     // Query para inserir no banco de dados
-    char query[256];
-    sprintf_s(query, "INSERT INTO clientes (nome_cliente, email, telefone) VALUES ('%s', '%s', '%s')",
-        cliente.nome_cliente, cliente.email, cliente.telefone);
+    char query[512];  // Aumentando o buffer para incluir o campo endereço
+    sprintf_s(query, "INSERT INTO clientes (nome_cliente, email, telefone, endereco) VALUES ('%s', '%s', '%s', '%s')",
+        cliente.nome_cliente, cliente.email, cliente.telefone, cliente.endereco);
 
     // Executar a query
     if (mysql_query(conn, query)) {
@@ -618,7 +624,7 @@ void editar_cliente(MYSQL* conn) {
     // Coletar novas informações do cliente
     printf("Digite o novo nome do cliente: ");
     fgets(cliente.nome_cliente, sizeof(cliente.nome_cliente), stdin);
-    cliente.nome_cliente[strcspn(cliente.nome_cliente, "\n")] = 0;  // Remover o '\n'
+    cliente.nome_cliente[strcspn(cliente.nome_cliente, "\n")] = 0;
 
     printf("Digite o novo email do cliente: ");
     fgets(cliente.email, sizeof(cliente.email), stdin);
@@ -628,10 +634,14 @@ void editar_cliente(MYSQL* conn) {
     fgets(cliente.telefone, sizeof(cliente.telefone), stdin);
     cliente.telefone[strcspn(cliente.telefone, "\n")] = 0;
 
+    printf("Digite o novo endereço do cliente: ");
+    fgets(cliente.endereco, sizeof(cliente.endereco), stdin);
+    cliente.endereco[strcspn(cliente.endereco, "\n")] = 0;
+
     // Query para atualizar as informações do cliente
-    char query[256];
-    sprintf_s(query, "UPDATE clientes SET nome_cliente='%s', email='%s', telefone='%s' WHERE id=%d",
-        cliente.nome_cliente, cliente.email, cliente.telefone, id);
+    char query[512];  // Aumentando o buffer para incluir o campo endereço
+    sprintf_s(query, "UPDATE clientes SET nome_cliente='%s', email='%s', telefone='%s', endereco='%s' WHERE id=%d",
+        cliente.nome_cliente, cliente.email, cliente.telefone, cliente.endereco, id);
 
     // Executar a query
     if (mysql_query(conn, query)) {
@@ -704,7 +714,7 @@ void mostrar_clientes(MYSQL* conn) {
     mysql_free_result(resultado);
 }
 
-// Função principal para gerenciar clientes para a função menu nao ficar tao grande :)
+// Função principal para gerenciar clientes(menu de cliente XD pro menu normal nao ficar tao grande)
 void clientes(MYSQL* conn) {
     int opcao;
 
@@ -777,14 +787,14 @@ void mostrar_menu(const char* role) {
                     printf("7. mostrar despesas\n");
                     printf("8. Sair\n");
                     fflush(stdin);
-                    if (!scanf_s("%d", &tarefa)) { 
+                    if (!scanf_s("%d", &tarefa)) {
                         printf("Erro ao ler a opcao.\n");
                     }
                     switch (tarefa) {
                     case 1: {
                         char nome_usuario[50];
                         char senha[50];
-                        char novo_role[20]; 
+                        char novo_role[20];
                         // Coletar informações do novo usuário
                         printf("Digite o nome do usuário a ser cadastrado: ");
                         fflush(stdin);
@@ -851,9 +861,9 @@ void mostrar_menu(const char* role) {
                 printf("Acesso negado. Somente Administradores podem acessar esta opção.\n");
                 _getch();
             }
-            break; 
+            break;
         case 2:
-            
+
             if (strcmp(role, "admin") == 0 || strcmp(role, "estoquista") == 0) {
                 int tarefa;
                 do {
@@ -893,9 +903,9 @@ void mostrar_menu(const char* role) {
                 printf("Acesso negado. Somente Administradores ou Estoquistas podem acessar esta opção.\n");
                 _getch();
             }
-            break; 
+            break;
         case 3:
-           
+
             if (strcmp(role, "admin") == 0 || strcmp(role, "caixa") == 0) {
                 int tarefa;
                 do {
@@ -948,7 +958,7 @@ int main() {
     if (conn == NULL) {
         fprintf(stderr, "Erro ao inicializar MySQL: %s\n", mysql_error(conn));
         exit(1);
-    } 
+    }
     conectar_ao_banco(conn);
 
     char nome_usuario[50];
